@@ -2,3 +2,6 @@
 
 - name: restart iptables
   service: name=iptables state=restarted
+
+- name: reload firewall-cmd
+  command: firewall-cmd --reload

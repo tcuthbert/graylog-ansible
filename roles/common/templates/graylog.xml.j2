@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--{{ ansible_managed }}-->
+<service>
+  <short>Graylog</short>
+  <description>Graylog is a fully integrated open source log management platform for collecting, indexing, and analyzing both structured and unstructured data from almost any source.</description>
+  <port protocol="tcp" port="{{ ssh_port }}"/>
+  <port protocol="udp" port="{{ graylog_input_port }}"/>
+  <port protocol="udp" port="514"/>
+  <port protocol="udp" port="161"/>
+</service>

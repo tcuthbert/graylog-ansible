@@ -10,8 +10,14 @@
   when: upgrade is defined
   tags: graylog
 
-- name: Adding graylog repo
+- name: Adding graylog Centos 6 repo
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version < '7.0'
   yum: name=https://packages.graylog2.org/repo/packages/graylog-{{ graylog_version }}-repository-el6_latest.rpm state=present 
+  tags: graylog
+
+- name: Adding graylog Centos 7 repo
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7.0'
+  yum: name=https://packages.graylog2.org/repo/packages/graylog-{{ graylog_version }}-repository-el7_latest.rpm state=present 
   tags: graylog
 
 - name: Install graylog-server and graylog-web-interface

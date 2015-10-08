@@ -5,8 +5,16 @@
   tags:
    - common
 
-- name: Add EPEL Repo
+- name: Add EPEL Centos 6 Repo
   yum: name=http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version < '7.0'
+  tags:
+   - common
+   - epel
+
+- name: Add EPEL Centos 7 Repo
+  yum: name=http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7.0'
   tags:
    - common
    - epel
@@ -19,8 +27,34 @@
    - java
 
 - name: Add iptables rules
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version < '7.0'
   template: src=iptables.j2 dest=/etc/sysconfig/iptables backup=yes owner=root group=root mode=0600
   notify: restart iptables
   tags:
    - common
    - iptables
+
+- name: Add graylog firewalld service
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version > '7.0'
+  template: src=graylog.xml.j2 dest=/etc/firewalld/services/graylog.xml backup=yes owner=root group=root mode=0600
+  tags:
+   - common
+   - firewalld
+
+- name: Forward graylog ports
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version > '7.0'
+  shell: firewall-cmd --zone=public --add-forward-port=port=514:proto=udp:toport={{ graylog_input_port }} --permanent && firewall-cmd --reload
+  tags:
+   - common
+   - firewalld
+   - port-forward
+
+- name: Append graylog service to public zone
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version > '7.0'
+  firewalld: zone=public service={{ item }} permanent=true state=enabled immediate=true
+  with_items:
+  - graylog
+  - https
+  tags:
+   - common
+   - firewalld
